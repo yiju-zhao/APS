@@ -24,6 +24,7 @@ Answer `y` to add the marketplace, then pick a scope.
 ```
 /billing-usage:report 2026-10-08
 /billing-usage:report 2026-10-08 --end 2026-10-31
+/billing-usage:setup
 ```
 
 The first argument is the first day of the billing cycle. The command prints one row per UTC day
@@ -43,8 +44,12 @@ and a total: requests, input, output, cache write, cache read, and `cost_usd`.
 
 #### Multiple devices
 
-List your devices in `~/.config/billing-usage/devices.json` (or pass `--devices FILE`). Each
-device has a name, a connection method and, for `ssh`, an address:
+Run `/billing-usage:setup` to build the devices file step by step. It lists candidates from
+`tailscale status` and `~/.ssh/config`, asks which to include, writes the file, and tests each
+connection, telling you how to fix any that fail.
+
+Or write it by hand: list your devices in `~/.config/billing-usage/devices.json` (or pass
+`--devices FILE`). Each device has a name, a connection method and, for `ssh`, an address:
 
 ```json
 {"devices": [
@@ -64,8 +69,8 @@ counted, this machine included.
   that works without a prompt, and `python3`. Trust each device's host key once with
   `ssh <address>`; the plugin never turns host key checking off.
 - Devices are read in parallel. The output has the combined per-day table and a per-device table.
-- A device that cannot be read is marked `UNREACHABLE` with the reason and left out of the
-  totals, with a warning. It is never counted as zero.
+- A device that cannot be read is marked `UNREACHABLE` and left out of the totals. A warning
+  gives the reason and, for the common cases, a `fix:` line. It is never counted as zero.
 - Each device keeps its own 30-day transcript history. If you sync `~/.claude/projects` between
   devices, the same request can appear on two of them and be counted twice.
 - Keep `devices.json` out of this repository: it holds addresses and user names.
