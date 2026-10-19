@@ -1,0 +1,12 @@
+{
+  "name": "aps",
+  "owner": { "name": "yiju-zhao" },
+  "description": "Personal Claude Code plugins",
+  "plugins": [
+    {
+      "name": "billing-usage",
+      "source": "./plugins/billing-usage",
+      "description": "Per-day (UTC) Claude Code token usage and API-list-price equivalent cost for a billing cycle, summed from local session transcripts"
+    }
+  ]
+}
