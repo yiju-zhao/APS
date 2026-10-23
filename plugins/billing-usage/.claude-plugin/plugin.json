@@ -1,6 +1,8 @@
 {
   "name": "billing-usage",
-  "version": "0.3.0",
-  "author": { "name": "yiju-zhao" },
-  "description": "Per-day (UTC) Claude Code token usage and API-list-price equivalent cost for a billing cycle, summed from local session transcripts on this device or any device reachable over ssh"
+  "version": "0.4.0",
+  "author": {
+    "name": "yiju-zhao"
+  },
+  "description": "Set up the devices file for bu, the billing-usage CLI (Claude Code token usage and list-price cost across devices); the CLI itself lives in github.com/yiju-zhao/billing-usage"
 }
