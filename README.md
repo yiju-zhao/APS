@@ -17,7 +17,7 @@ Answer `y` to add the marketplace, then pick a scope.
 
 | Plugin | What it does |
 | --- | --- |
-| [billing-usage](plugins/billing-usage) | Per-day (UTC) token usage and API-list-price equivalent cost since a billing-cycle start date, summed across your devices |
+| [billing-usage](plugins/billing-usage) | Per-day (UTC) token usage and API-list-price equivalent cost since a billing-cycle start date, summed across your devices, as a report or a resident terminal UI |
 
 ### billing-usage
 
@@ -74,6 +74,57 @@ counted, this machine included.
 - Each device keeps its own 30-day transcript history. If you sync `~/.claude/projects` between
   devices, the same request can appear on two of them and be counted twice.
 - Keep `devices.json` out of this repository: it holds addresses and user names.
+
+#### Terminal UI
+
+A resident view of the same numbers: a stacked timeline and a share table, each headed by a sentence
+whose words you can change (for example `花费 · 所有设备 · 按模型 · 每 4 小时 · 最近 7 天`). It reads the
+same devices file as the report. It needs [uv](https://docs.astral.sh/uv/); `uv run --script` fetches
+Python 3.11+ and Textual (pinned in the script header) on first use.
+
+```
+uv run --script ~/.claude/plugins/marketplaces/aps/plugins/billing-usage/scripts/billing_usage_tui.py
+```
+
+Suggested alias, for your shell rc file (the plugin never edits it):
+
+```
+alias bu='uv run --script ~/.claude/plugins/marketplaces/aps/plugins/billing-usage/scripts/billing_usage_tui.py'
+```
+
+The marketplace path works once this change is merged and the marketplace is updated; until then, or while
+developing, use the same path under `~/Developer/repos/APS`. Options:
+`--devices FILE`, `--config-dir DIR` and `--timeout SECONDS` (default 120 per ssh device).
+`--once` refreshes, updates the status-line summary, prints one line (`本周期 … · 今日 … · n/m 台在线`,
+then one line for each offline device) and exits.
+
+| Key | Action |
+| --- | --- |
+| `r` | refresh now (it also refreshes every 60 s, and never starts a second refresh while one is running) |
+| `q` | quit |
+| `c` | set the billing-cycle start day, 1 to 28 (default 8; cycles start at 00:00 UTC) |
+| `+` (or `=`), `-` | zoom the timeline in and out; the bucket size follows the zoom |
+| `←` `→` | move the highlighted bar; once zoomed, pan the window |
+| `Shift` + `←` `→` | always move the highlighted bar |
+| `↑` `↓` | pick a legend entry |
+| `i` | show only the picked entry; `Esc` lets go |
+| `Tab`, `Enter`, or click | change a word in a sentence: metric, device, grouping, bucket size, range |
+
+- The TUI and `/billing-usage:report` share one calculation (`billing_usage.py` reads, deduplicates
+  and prices the requests for both), so the cycle total equals the report's `TOTAL` for the same
+  devices at the same moment.
+- For `ssh` devices the script runs with `--rows`: each request comes back as one row (time, model,
+  effort, project folder name, skill, token counts, cost). Nothing is installed or written on the
+  device, and no conversation content leaves it.
+- A device that cannot be read shows as `<name> 离线 · 最后成功于 <time> · <fix hint>`. The TUI keeps
+  running and keeps that device's last rows, so the other numbers do not change.
+- Cache: `${XDG_CACHE_HOME:-~/.cache}/billing-usage/` holds `rows-<device>.json` (the last rows read
+  from each device), `summary.json` and `limits.json`. State, meaning your sentence choices and the
+  cycle day, is `${XDG_STATE_HOME:-~/.local/state}/billing-usage/tui.json`.
+- `summary.json` holds today's and the cycle's cost (and `updated_at`) for a status line: one `jq` call
+  can show `今日 … · 周期 …`, dimmed once it is older than 10 minutes. `limits.json` holds
+  `seven_day_resets_at` (epoch seconds, Claude Code's `rate_limits.seven_day.resets_at`), which only a
+  status line can record; until it is there, the range "自每周重置以来" is unavailable.
 
 ## Add a plugin
 
