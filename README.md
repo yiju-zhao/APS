@@ -92,7 +92,8 @@ Suggested alias, for your shell rc file (the plugin never edits it):
 alias bu='uv run --script ~/.claude/plugins/marketplaces/aps/plugins/billing-usage/scripts/billing_usage_tui.py'
 ```
 
-While developing this repository, the same path under `~/Developer/repos/APS` works. Options:
+The marketplace path works once this change is merged and the marketplace is updated; until then, or while
+developing, use the same path under `~/Developer/repos/APS`. Options:
 `--devices FILE`, `--config-dir DIR` and `--timeout SECONDS` (default 120 per ssh device).
 `--once` refreshes, updates the status-line summary, prints one line (`本周期 … · 今日 … · n/m 台在线`,
 then one line for each offline device) and exits.
@@ -102,7 +103,7 @@ then one line for each offline device) and exits.
 | `r` | refresh now (it also refreshes every 60 s, and never starts a second refresh while one is running) |
 | `q` | quit |
 | `c` | set the billing-cycle start day, 1 to 28 (default 8; cycles start at 00:00 UTC) |
-| `+` `-` | zoom the timeline in and out; the bucket size follows the zoom |
+| `+` (or `=`), `-` | zoom the timeline in and out; the bucket size follows the zoom |
 | `←` `→` | move the highlighted bar; once zoomed, pan the window |
 | `Shift` + `←` `→` | always move the highlighted bar |
 | `↑` `↓` | pick a legend entry |
