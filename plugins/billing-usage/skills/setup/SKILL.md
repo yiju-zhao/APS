@@ -2,11 +2,16 @@
 description: Set up the devices file for billing-usage - find candidate devices, write the file, and test each connection
 argument-hint: [devices-file-path]
 disable-model-invocation: true
-allowed-tools: Bash(python3 *billing_usage.py*)
+allowed-tools: Bash(bu report *), Bash(command -v bu)
 ---
 
 Guide the user through creating or extending the devices file, then test every device. Take
 one step at a time, ask rather than guess, and keep the user's other entries.
+
+The devices file is read by `bu`, the billing-usage command-line tool
+(https://github.com/yiju-zhao/billing-usage). Before anything else, run `command -v bu`. If it is
+missing, stop and tell the user to install it with
+`uv tool install git+https://github.com/yiju-zhao/billing-usage`, then run this command again.
 
 ## The file
 
@@ -21,8 +26,8 @@ never goes into this plugin or its repository.
 ]}
 ```
 
-- `name` (unique) and `method` are required. `local` reads the machine that runs the report.
-  `ssh` runs the same script on the device and reads back one line of JSON; nothing is
+- `name` (unique) and `method` are required. `local` reads the machine that runs `bu`.
+  `ssh` runs `bu`'s script on the device and reads back one line of JSON; nothing is
   installed or written there. These are the only two methods.
 - `ssh` needs `address` (an IP or host name). Optional: `user`, `port`, `identity_file`,
   `python` (default `python3`) and `config_dir` (default: the device's own `~/.claude`).
@@ -41,13 +46,11 @@ never goes into this plugin or its repository.
    for `user` when it may differ from this machine's user, and never guess it. Add this
    machine as `local`, named after `hostname`, if it is not listed.
 4. **Write the file.** Create the folder if needed. Write valid JSON.
-5. **Test.** Run
-   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/billing_usage.py" --start <today, UTC, YYYY-MM-DD>`
-   (add `--devices <path>` when a path was given) and show the per-device table. For each
+5. **Test.** Run `bu report --start <today, UTC, YYYY-MM-DD>` (add `--devices <path>` when a path was given) and show the per-device table. For each
    `UNREACHABLE` device, relay the `fix:` line under the warning. When the fix is to trust a
    host key, ask the user to run `ssh <address>` themselves with the `!` prefix at the prompt.
    Do not turn off host key checking, edit `known_hosts`, or change the ssh configuration for
    them. After the user acts, run the test again.
 6. **Finish** when every device shows `ok`, or the user decides to leave one out (offer to
-   remove its entry). Give the file path and say that `/billing-usage:report <cycle-start>`
-   now covers all listed devices.
+   remove its entry). Give the file path and say that `bu` (the terminal UI) and
+   `bu report --start <cycle-start>` now cover all listed devices.
